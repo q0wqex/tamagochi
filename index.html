@@ -196,13 +196,179 @@
         .restart-btn:hover {
             transform: scale(1.05);
         }
+
+        .difficulty-select {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .diff-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .diff-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .diff-btn.easy { background: linear-gradient(145deg, #4cd137, #27ae60); color: white; }
+        .diff-btn.normal { background: linear-gradient(145deg, #f0932b, #e67e22); color: white; }
+        .diff-btn.hard { background: linear-gradient(145deg, #e94560, #c0392b); color: white; }
+
+        .screamer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: shake 0.1s infinite;
+        }
+
+        .screamer.show {
+            display: flex;
+        }
+
+        .screamer-face {
+            font-size: 200px;
+            animation: pulse 0.2s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(-10px) rotate(-5deg); }
+            50% { transform: translateX(10px) rotate(5deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
+            50% { transform: scale(1.2); filter: hue-rotate(180deg); }
+        }
+
+        .blood-drip {
+            position: fixed;
+            top: -50px;
+            width: 30px;
+            height: 100px;
+            background: linear-gradient(180deg, #ff0000, #8b0000);
+            border-radius: 0 0 15px 15px;
+            animation: drip 2s infinite;
+        }
+
+        @keyframes drip {
+            0% { top: -50px; opacity: 1; }
+            100% { top: 100vh; opacity: 0; }
+        }
+
+        .food-menu {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #3d2852, #2a1f3d);
+            border: 3px solid #e94560;
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 200;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .food-menu.show {
+            display: block;
+        }
+
+        .food-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .food-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .food-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .food-btn.apple { background: linear-gradient(145deg, #e74c3c, #c0392b); color: white; }
+        .food-btn.banana { background: linear-gradient(145deg, #f1c40f, #f39c12); color: #333; }
+        .food-btn.pomegranate { background: linear-gradient(145deg, #8e44ad, #9b59b6); color: white; }
+
+        .cancel-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #666;
+            color: #aaa;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        .cancel-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 150;
+        }
+
+        .overlay.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <h1>🐰 Злой Кролик 🐰</h1>
         
-        <div class="rabbit-display">
+        <div class="difficulty-select" id="difficulty-select">
+            <p style="color: #fff; margin-bottom: 15px; text-align: center;">Выберите сложность:</p>
+            <div class="difficulty-buttons">
+                <button class="diff-btn easy" onclick="startGame('easy')">😇 Лёгко</button>
+                <button class="diff-btn normal" onclick="startGame('normal')">😈 Нормально</button>
+                <button class="diff-btn hard" onclick="startGame('hard')">💀 Сложно</button>
+            </div>
+        </div>
+
+        <div class="rabbit-display" id="rabbit-display" style="display: none;">
             <span class="rabbit-emoji" id="rabbit">😈</span>
             <div class="rabbit-name" id="name">Злюка</div>
             <div class="rabbit-mood" id="mood">Настроение: Агрессивное</div>
@@ -236,8 +402,8 @@
         </div>
 
         <div class="actions">
-            <button class="action-btn feed" onclick="feed()">
-                <span>🍖</span> Покормить
+            <button class="action-btn feed" onclick="showFoodMenu()">
+                <span>🍖</span> Кормить
             </button>
             <button class="action-btn play" onclick="play()">
                 <span>🎮</span> Играть
@@ -248,6 +414,22 @@
             <button class="action-btn pet" onclick="pet()">
                 <span>✋</span> Погладить
             </button>
+        </div>
+
+        <div class="food-menu" id="food-menu">
+            <p style="color: #fff; margin-bottom: 15px; text-align: center;">Выберите еду:</p>
+            <div class="food-buttons">
+                <button class="food-btn apple" onclick="feed('apple')">
+                    <span>🍎</span> Яблоко
+                </button>
+                <button class="food-btn banana" onclick="feed('banana')">
+                    <span>🍌</span> Банан
+                </button>
+                <button class="food-btn pomegranate" onclick="feed('pomegranate')">
+                    <span>🔴</span> Гранат
+                </button>
+            </div>
+            <button class="cancel-btn" onclick="hideFoodMenu()">✕ Отмена</button>
         </div>
 
         <div class="message-box" id="message">
@@ -261,7 +443,44 @@
         <button class="restart-btn" onclick="restartGame()">Начать заново</button>
     </div>
 
+    <div class="screamer" id="screamer">
+        <div class="screamer-face">😱</div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="hideFoodMenu()"></div>
+
+    <audio id="scream-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
+    </audio>
+
     <script>
+        // Настройки сложности
+        const difficultySettings = {
+            easy: {
+                name: 'Лёгко',
+                decayRate: 0.5,
+                angerGrowth: 1,
+                startBonus: 100
+            },
+            normal: {
+                name: 'Нормально',
+                decayRate: 1,
+                angerGrowth: 2,
+                startBonus: 0
+            },
+            hard: {
+                name: 'Сложно',
+                decayRate: 2,
+                angerGrowth: 4,
+                startBonus: -20
+            }
+        };
+
+        let currentDifficulty = 'normal';
+        let gameInterval = null;
+        let screamerTimeout = null;
+        let screamerActive = false;
+
         // Состояние игры
         let gameState = {
             hunger: 100,
@@ -269,8 +488,70 @@
             energy: 100,
             anger: 0,
             isSleeping: false,
-            alive: true
+            alive: false
         };
+
+        // Старт игры
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            const settings = difficultySettings[difficulty];
+            
+            gameState = {
+                hunger: Math.min(100, 100 + settings.startBonus),
+                happiness: Math.min(100, 100 + settings.startBonus),
+                energy: Math.min(100, 100 + settings.startBonus),
+                anger: Math.max(0, 0 - settings.startBonus),
+                isSleeping: false,
+                alive: true
+            };
+            
+            document.getElementById('difficulty-select').style.display = 'none';
+            document.getElementById('rabbit-display').style.display = 'block';
+            document.querySelector('.stats').style.display = 'grid';
+            document.querySelector('.actions').style.display = 'grid';
+            document.getElementById('message').style.display = 'block';
+            
+            showMessage('Кролик Злюка смотрит на тебя злобно... Сложность: ' + settings.name);
+            updateUI();
+            
+            if (gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(gameLoop, 2000);
+        }
+
+        // Скример
+        function triggerScreamer() {
+            if (screamerActive || !gameState.alive) return;
+            
+            screamerActive = true;
+            const screamer = document.getElementById('screamer');
+            const screamerFace = screamer.querySelector('.screamer-face');
+            
+            // Случайное страшное лицо
+            const scaryFaces = ['😱', '💀', '👹', '👻', '😈', '🤡', '🧟'];
+            screamerFace.textContent = scaryFaces[Math.floor(Math.random() * scaryFaces.length)];
+            
+            screamer.classList.add('show');
+            
+            // Создаём капли крови
+            for (let i = 0; i < 5; i++) {
+                const drip = document.createElement('div');
+                drip.className = 'blood-drip';
+                drip.style.left = Math.random() * 100 + 'vw';
+                drip.style.animationDelay = Math.random() * 2 + 's';
+                screamer.appendChild(drip);
+            }
+            
+            // Вибрация экрана
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 500]);
+            }
+            
+            setTimeout(() => {
+                screamer.classList.remove('show');
+                screamer.innerHTML = '<div class="screamer-face"></div>';
+                screamerActive = false;
+            }, 1500);
+        }
 
         // Эмодзи кролика в зависимости от состояния
         const rabbitEmojis = {
@@ -337,21 +618,56 @@
             document.getElementById('message').textContent = text;
         }
 
+        // Показать меню еды
+        function showFoodMenu() {
+            if (!gameState.alive || gameState.isSleeping) return;
+            document.getElementById('food-menu').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+        }
+
+        // Скрыть меню еды
+        function hideFoodMenu() {
+            document.getElementById('food-menu').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+        }
+
         // Покормить
-        function feed() {
+        function feed(foodType) {
             if (!gameState.alive || gameState.isSleeping) return;
             
-            gameState.hunger = Math.min(100, gameState.hunger + 20);
-            gameState.anger = Math.max(0, gameState.anger - 5);
-            gameState.energy = Math.max(0, gameState.energy - 5);
+            hideFoodMenu();
             
-            const messages = [
-                'Кролик жадно ест морковь!',
-                'Злюка ворчит, но ест...',
-                'Кролик бросает еду, но потом съедает!',
-                '«Ещё!» - говорит взгляд кролика'
-            ];
-            showMessage(messages[Math.floor(Math.random() * messages.length)]);
+            if (foodType === 'pomegranate') {
+                // Гранат - кролик убегает!
+                endGame('Кролик увидел гранат и сбежал в ужасе! 🏃‍♂️💨');
+                return;
+            }
+            
+            if (foodType === 'apple') {
+                gameState.hunger = Math.min(100, gameState.hunger + 25);
+                gameState.anger = Math.max(0, gameState.anger - 10);
+                gameState.energy = Math.max(0, gameState.energy - 5);
+                const messages = [
+                    'Кролик хрустит яблоком с удовольствием!',
+                    'Злюка ворчит, но яблоко ему нравится!',
+                    '«Ещё яблок!» - требует кролик!',
+                    'Кролик забирает яблоко и уходит в угол...'
+                ];
+                showMessage(messages[Math.floor(Math.random() * messages.length)]);
+            } else if (foodType === 'banana') {
+                gameState.hunger = Math.min(100, gameState.hunger + 30);
+                gameState.happiness = Math.min(100, gameState.happiness + 5);
+                gameState.anger = Math.max(0, gameState.anger - 5);
+                gameState.energy = Math.max(0, gameState.energy - 5);
+                const messages = [
+                    'Кролик обожает бананы! Это его любимая еда!',
+                    'Злюка доволен как никогда!',
+                    '«Бананы — это сила!» - думает кролик',
+                    'Кролик прячет банан про запас...'
+                ];
+                showMessage(messages[Math.floor(Math.random() * messages.length)]);
+            }
+            
             updateUI();
         }
 
@@ -386,6 +702,11 @@
                 gameState.energy = Math.min(100, gameState.energy + 30);
                 gameState.hunger = Math.max(0, gameState.hunger - 15);
                 showMessage('Кролик проснулся и выглядит ещё злее!');
+                
+                // Скример при пробуждении если злость высокая
+                if (gameState.anger > 60) {
+                    setTimeout(() => triggerScreamer(), 500);
+                }
             }
             updateUI();
         }
@@ -403,6 +724,11 @@
                 gameState.anger = Math.min(100, gameState.anger + 20);
                 gameState.happiness = Math.max(0, gameState.happiness - 10);
                 showMessage('Кролик кусает тебя! Видимо, сегодня не день для ласки...');
+                
+                // Шанс скримера при укусе
+                if (Math.random() < 0.3) {
+                    setTimeout(() => triggerScreamer(), 300);
+                }
             }
             updateUI();
         }
@@ -428,6 +754,11 @@
             document.getElementById('game-over-reason').textContent = reason;
             document.getElementById('game-over').classList.add('show');
             updateUI();
+            
+            // Скример при проигрыше
+            setTimeout(() => {
+                triggerScreamer();
+            }, 500);
         }
 
         // Перезапуск
@@ -438,33 +769,49 @@
                 energy: 100,
                 anger: 0,
                 isSleeping: false,
-                alive: true
+                alive: false
             };
             document.getElementById('game-over').classList.remove('show');
-            showMessage('Кролик Злюка смотрит на тебя злобно...');
-            updateUI();
+            document.getElementById('difficulty-select').style.display = 'block';
+            document.getElementById('rabbit-display').style.display = 'none';
+            document.querySelector('.stats').style.display = 'none';
+            document.querySelector('.actions').style.display = 'none';
+            document.getElementById('message').style.display = 'none';
+            hideFoodMenu();
+            
+            if (gameInterval) clearInterval(gameInterval);
         }
 
-        // Игровой цикл (ухудшение показателей со временем)
-        setInterval(() => {
+        // Игровой цикл
+        function gameLoop() {
             if (!gameState.alive) return;
             
+            const settings = difficultySettings[currentDifficulty];
+            
             if (gameState.isSleeping) {
-                gameState.energy = Math.min(100, gameState.energy + 5);
-                gameState.hunger = Math.max(0, gameState.hunger - 3);
+                gameState.energy = Math.min(100, gameState.energy + 5 * settings.decayRate);
+                gameState.hunger = Math.max(0, gameState.hunger - 3 * settings.decayRate);
             } else {
-                gameState.hunger = Math.max(0, gameState.hunger - 2);
-                gameState.happiness = Math.max(0, gameState.happiness - 3);
-                gameState.energy = Math.max(0, gameState.energy - 1);
-                gameState.anger = Math.min(100, gameState.anger + 2);
+                gameState.hunger = Math.max(0, gameState.hunger - 2 * settings.decayRate);
+                gameState.happiness = Math.max(0, gameState.happiness - 3 * settings.decayRate);
+                gameState.energy = Math.max(0, gameState.energy - 1 * settings.decayRate);
+                gameState.anger = Math.min(100, gameState.anger + settings.angerGrowth);
+            }
+            
+            // Случайные скримеры
+            const screamerChance = currentDifficulty === 'hard' ? 0.08 : currentDifficulty === 'normal' ? 0.04 : 0.02;
+            if (Math.random() < screamerChance && gameState.anger > 50) {
+                triggerScreamer();
             }
             
             updateUI();
             checkGameOver();
-        }, 2000);
+        }
 
-        // Инициализация
-        updateUI();
+        // Инициализация - скрываем элементы до выбора сложности
+        document.querySelector('.stats').style.display = 'none';
+        document.querySelector('.actions').style.display = 'none';
+        document.getElementById('message').style.display = 'none';
     </script>
 </body>
 </html>
